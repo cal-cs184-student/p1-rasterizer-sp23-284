@@ -65,12 +65,33 @@ namespace CGL {
     }
   }
 
+  float RasterizerImp::line_equation(float x, float y,
+    float x1, float y1,
+    float x2, float y2) {
+    return -1 * (x - x1) * (y2 - y1) + (y - y1) * (x2 - x1);
+  }
+
   // Rasterize a triangle.
   void RasterizerImp::rasterize_triangle(float x0, float y0,
     float x1, float y1,
     float x2, float y2,
     Color color) {
+    //cout << x0 << " " << y0 << " " << x1 << " " << y1 << " " << x2 << " " << y2 << " " << color.r << " " << color.g << " " << color.b << endl;
     // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+    int xmin = min({ x0, x1, x2 }) - 1;
+    int xmax = max({ x0, x1, x2 }) + 1;
+    int ymin = min({ y0, y1, y2 }) - 1;
+    int ymax = max({ y0, y1, y2 }) + 1;
+    for (int y = ymin; y < ymax; y++) {
+      for (int x = xmin; x < xmax; x++) {
+        float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
+        float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
+        float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
+        if ((l0 > 0 && l1 > 0 && l2 > 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
+          rasterize_point(x + 0.5, y + 0.5, color);
+        }
+      }
+    }
 
     // TODO: Task 2: Update to implement super-sampled rasterization
 
