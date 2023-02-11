@@ -215,6 +215,19 @@ namespace CGL {
           sp.psm = this->psm;
           sp.lsm = this->lsm;
           sp.p_uv = uv;
+          // calculate p_dx_uv, p_dy_uv
+          a = (-1 * (x + 1.5 - x1) * (y2 - y1) + (y + 0.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          b = (-1 * (x + 1.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          r = 1 - a - b;
+          Vector2D dx_uv((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
+          sp.p_dx_uv = dx_uv;
+
+          a = (-1 * (x + 0.5 - x1) * (y2 - y1) + (y + 1.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 1.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          r = 1 - a - b;
+          Vector2D dy_uv((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
+          sp.p_dy_uv = dy_uv;
+
           sample_buffer[sy * width * sqrt_sample_rate + sx] = tex.sample(sp);
         }
       }

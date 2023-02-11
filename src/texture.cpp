@@ -9,12 +9,18 @@ namespace CGL {
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
     Color col(0, 0, 0);
-    if (sp.psm == P_NEAREST) {
-      col = this->sample_nearest(sp.p_uv, 0);
+    if (sp.lsm == L_ZERO) {
+      if (sp.psm == P_NEAREST) {
+        col = this->sample_nearest(sp.p_uv, 0);
+      }
+      else if (sp.psm == P_LINEAR) {
+        col = this->sample_bilinear(sp.p_uv, 0);
+      }
     }
-    else if (sp.psm == P_LINEAR) {
-      col = this->sample_bilinear(sp.p_uv, 0);
+    else if (sp.lsm == L_NEAREST) {
+
     }
+    
     return col;
 
 

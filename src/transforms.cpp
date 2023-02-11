@@ -3,6 +3,7 @@
 #include "CGL/matrix3x3.h"
 #include "CGL/vector2D.h"
 #include "CGL/vector3D.h"
+# define M_PI 3.14159265358979323846
 
 namespace CGL {
 
@@ -30,7 +31,9 @@ Matrix3x3 rotate(float deg) {
 	// Part 3: Fill this in.
 
 
-	return Matrix3x3(cos(deg), -sin(deg), 0, sin(deg), cos(deg), 0, 0, 0, 1);
+	return Matrix3x3(cos(deg * M_PI / 180), -sin(deg * M_PI / 180), 0,
+		sin(deg * M_PI / 180), cos(deg * M_PI / 180), 0,
+		0, 0, 1);
 }
 
 }
