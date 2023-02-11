@@ -210,12 +210,12 @@ namespace CGL {
           float b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
           float r = 1 - a - b;
 
-          Vector2D uv((a * u0 + b * u1 + r * u2) / (width * sqrt_sample_rate), (a * v0 + b * v1 + r * v2) / (height * sqrt_sample_rate));
+          Vector2D uv((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
           SampleParams sp;
           sp.psm = this->psm;
           sp.lsm = this->lsm;
           sp.p_uv = uv;
-          //sample_buffer[sy * width * sqrt_sample_rate + sx] = tex.sample(sp);
+          sample_buffer[sy * width * sqrt_sample_rate + sx] = tex.sample(sp);
         }
       }
     }

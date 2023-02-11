@@ -12,7 +12,7 @@ namespace CGL {
     if (sp.psm == P_NEAREST) {
       col = this->sample_nearest(sp.p_uv, 0);
     }
-    else if (sp.psm == P_NEAREST) {
+    else if (sp.psm == P_LINEAR) {
       col = this->sample_bilinear(sp.p_uv, 0);
     }
     return col;
@@ -37,18 +37,10 @@ namespace CGL {
   Color Texture::sample_nearest(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
-    float actual_u = uv[0] * mip.width;
-    float actual_v = uv[1] * mip.height;
-    int sample_u = round(actual_u);
-    int sample_v = round(actual_v);
-    cout << actual_u << " " << sample_u << " " << actual_v << " " << sample_v << endl;
-    /*if ((sample_u < mip.width && sample_u>0) && (sample_v < mip.width && sample_v>0))
-      return mip.get_texel(sample_u, sample_v);
-    else
-      return Color();*/
-
-
-
+    int texture_u = round(uv[0] * mip.width);
+    int texture_v = round(uv[1] * mip.height);
+    if ((texture_u < mip.width && texture_u >= 0) && (texture_v < mip.height && texture_v >= 0))
+      return mip.get_texel(texture_u, texture_v);
     // return magenta for invalid level
     return Color(1, 0, 1);
   }
@@ -56,14 +48,26 @@ namespace CGL {
   Color Texture::sample_bilinear(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
-
-
-
-
+    float u = uv[0] * mip.width;
+    float v = uv[1] * mip.height;
+    int floor_u = floor(uv[0] * mip.width), floor_v = floor(uv[1] * mip.height);
+    int ceil_u = ceil(uv[0] * mip.width), ceil_v = ceil(uv[1] * mip.height);
+    if (floor_u >= 0 && ceil_u < mip.width && floor_v >= 0 && ceil_v < mip.height) {
+      float s = ceil_u - u, t = ceil_v - v;
+      Color rt = mip.get_texel(floor_u, floor_v);
+      Color lt = mip.get_texel(ceil_u, floor_v);
+      Color rb = mip.get_texel(floor_u, ceil_v);
+      Color lb = mip.get_texel(ceil_u, ceil_v);
+      // return lerp(s, lerp(t, rb, rt), lerp(t, lb, lt));
+      return lerp(t, lerp(s, rb, lb), lerp(s, rt, lt));
+    }
     // return magenta for invalid level
     return Color(1, 0, 1);
   }
 
+  Color Texture::lerp(float x, Color c0, Color c1) {
+    return Color(c0.r + x * (c1.r - c0.r), c0.g + x * (c1.g - c0.g), c0.b + x * (c1.b - c0.b));
+  }
 
 
   /****************************************************************************/

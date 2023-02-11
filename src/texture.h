@@ -57,6 +57,8 @@ struct Texture {
   Color sample_nearest(Vector2D uv, int level = 0);
 
   Color sample_bilinear(Vector2D uv, int level = 0);
+
+  Color lerp(float x, Color c0, Color c1);
 };
 
 }
