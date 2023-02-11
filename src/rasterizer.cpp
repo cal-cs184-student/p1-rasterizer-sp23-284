@@ -123,7 +123,7 @@ namespace CGL {
         float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
         float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
         float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
-        if ((l0 > 0 && l1 > 0 && l2 > 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
+        if ((l0 >= 0 && l1 >= 0 && l2 >= 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
           //fill_pixel(sx, sy, color);
           sample_buffer[sy * width * this->sample_rate + sx] = color;
         }
@@ -138,7 +138,36 @@ namespace CGL {
   {
     // TODO: Task 4: Rasterize the triangle, calculating barycentric coordinates and using them to interpolate vertex colors across the triangle
     // Hint: You can reuse code from rasterize_triangle
+    x0 = x0 * this->sample_rate;
+    x1 = x1 * this->sample_rate;
+    x2 = x2 * this->sample_rate;
+    y0 = y0 * this->sample_rate;
+    y1 = y1 * this->sample_rate;
+    y2 = y2 * this->sample_rate;
+    int xmin = min({ x0, x1, x2 }) - 1;
+    int xmax = max({ x0, x1, x2 }) + 1;
+    int ymin = min({ y0, y1, y2 }) - 1;
+    int ymax = max({ y0, y1, y2 }) + 1;
+    for (int y = ymin; y < ymax; y++) {
+      for (int x = xmin; x < xmax; x++) {
+        int sx = (int)floor(x + 0.5);
+        int sy = (int)floor(y + 0.5);
+        // check bounds
+        if (sx < 0 || sx >= width * this->sample_rate) continue;
+        if (sy < 0 || sy >= height * this->sample_rate) continue;
 
+        float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
+        float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
+        float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
+        if ((l0 >= 0 && l1 >= 0 && l2 >= 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
+          //fill_pixel(sx, sy, color);
+          float a = (-1 * (x + 0.5 - x1) * (y2 - y1) + (y + 0.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          float b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          float r = 1 - a - b;
+          sample_buffer[sy * width * this->sample_rate + sx] = a * c0 + b * c1 + r * c2;
+        }
+      }
+    }
 
 
   }
