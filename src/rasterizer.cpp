@@ -94,7 +94,7 @@ namespace CGL {
         float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
         float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
         float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
-        if ((l0 > 0 && l1 > 0 && l2 > 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
+        if ((l0 >= 0 && l1 >= 0 && l2 >= 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
           rasterize_point(x + 0.5, y + 0.5, color);
         }
       }
@@ -227,7 +227,18 @@ namespace CGL {
   void RasterizerImp::resolve_to_framebuffer() {
     // TODO: Task 2: You will likely want to update this function for supersampling support
 
+    // Task 1
+    /*for (int x = 0; x < width; ++x) {
+      for (int y = 0; y < height; ++y) {
+        Color col = sample_buffer[y * width + x];
 
+        for (int k = 0; k < 3; ++k) {
+          this->rgb_framebuffer_target[3 * (y * width + x) + k] = (&col.r)[k] * 255;
+        }
+      }
+    }*/
+
+    // Task 2
     for (int x = 0; x < width; ++x) {
       for (int y = 0; y < height; ++y) {
         //Color col = sample_buffer[y * width + x];
