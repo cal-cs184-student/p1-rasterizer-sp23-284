@@ -8,6 +8,14 @@ namespace CGL {
 
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
+    Color col(0, 0, 0);
+    if (sp.psm == P_NEAREST) {
+      col = this->sample_nearest(sp.p_uv, 0);
+    }
+    else if (sp.psm == P_NEAREST) {
+      col = this->sample_bilinear(sp.p_uv, 0);
+    }
+    return col;
 
 
 // return magenta for invalid level
@@ -29,7 +37,15 @@ namespace CGL {
   Color Texture::sample_nearest(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
-
+    float actual_u = uv[0] * mip.width;
+    float actual_v = uv[1] * mip.height;
+    int sample_u = round(actual_u);
+    int sample_v = round(actual_v);
+    cout << actual_u << " " << sample_u << " " << actual_v << " " << sample_v << endl;
+    /*if ((sample_u < mip.width && sample_u>0) && (sample_v < mip.width && sample_v>0))
+      return mip.get_texel(sample_u, sample_v);
+    else
+      return Color();*/
 
 
 
@@ -69,7 +85,6 @@ namespace CGL {
   }
 
   void Texture::generate_mips(int startLevel) {
-
     // make sure there's a valid texture
     if (startLevel >= mipmap.size()) {
       std::cerr << "Invalid start level";

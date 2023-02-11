@@ -21,13 +21,13 @@ namespace CGL {
     // TODO: Task 2: You might need to this function to fix points and lines (such as the black rectangle border in test4.svg)
     // NOTE: You are not required to implement proper supersampling for points and lines
     // It is sufficient to use the same color for all supersamples of a pixel for points and lines (not triangles)
-
-    if (this->sample_rate == 1) {
+    int sqrt_sample_rate = sqrt(this->sample_rate);
+    if (sqrt_sample_rate == 1) {
       sample_buffer[y * width + x] = c;
     }
-    for (int i = 0; i < this->sample_rate; i++) {
-      for (int j = 0; j < this->sample_rate; j++) {
-        int coord = width * this->sample_rate * (y * this->sample_rate + j) + x * this->sample_rate + i;
+    for (int i = 0; i < sqrt_sample_rate; i++) {
+      for (int j = 0; j < sqrt_sample_rate; j++) {
+        int coord = width * sqrt_sample_rate * (y * sqrt_sample_rate + j) + x * sqrt_sample_rate + i;
         sample_buffer[coord] = c;
       }
     }
@@ -102,12 +102,13 @@ namespace CGL {
     */
 
     // TODO: Task 2: Update to implement super-sampled rasterization
-    x0 = x0 * this->sample_rate;
-    x1 = x1 * this->sample_rate;
-    x2 = x2 * this->sample_rate;
-    y0 = y0 * this->sample_rate;
-    y1 = y1 * this->sample_rate;
-    y2 = y2 * this->sample_rate;
+    int sqrt_sample_rate = sqrt(this->sample_rate);
+    x0 = x0 * sqrt_sample_rate;
+    x1 = x1 * sqrt_sample_rate;
+    x2 = x2 * sqrt_sample_rate;
+    y0 = y0 * sqrt_sample_rate;
+    y1 = y1 * sqrt_sample_rate;
+    y2 = y2 * sqrt_sample_rate;
     int xmin = min({ x0, x1, x2 }) - 1;
     int xmax = max({ x0, x1, x2 }) + 1;
     int ymin = min({ y0, y1, y2 }) - 1;
@@ -117,15 +118,15 @@ namespace CGL {
         int sx = (int)floor(x + 0.5);
         int sy = (int)floor(y + 0.5);
         // check bounds
-        if (sx < 0 || sx >= width * this->sample_rate) continue;
-        if (sy < 0 || sy >= height * this->sample_rate) continue;
+        if (sx < 0 || sx >= width * sqrt_sample_rate) continue;
+        if (sy < 0 || sy >= height * sqrt_sample_rate) continue;
 
         float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
         float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
         float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
         if ((l0 >= 0 && l1 >= 0 && l2 >= 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
           //fill_pixel(sx, sy, color);
-          sample_buffer[sy * width * this->sample_rate + sx] = color;
+          sample_buffer[sy * width * sqrt_sample_rate + sx] = color;
         }
       }
     }
@@ -138,12 +139,13 @@ namespace CGL {
   {
     // TODO: Task 4: Rasterize the triangle, calculating barycentric coordinates and using them to interpolate vertex colors across the triangle
     // Hint: You can reuse code from rasterize_triangle
-    x0 = x0 * this->sample_rate;
-    x1 = x1 * this->sample_rate;
-    x2 = x2 * this->sample_rate;
-    y0 = y0 * this->sample_rate;
-    y1 = y1 * this->sample_rate;
-    y2 = y2 * this->sample_rate;
+    int sqrt_sample_rate = sqrt(this->sample_rate);
+    x0 = x0 * sqrt_sample_rate;
+    x1 = x1 * sqrt_sample_rate;
+    x2 = x2 * sqrt_sample_rate;
+    y0 = y0 * sqrt_sample_rate;
+    y1 = y1 * sqrt_sample_rate;
+    y2 = y2 * sqrt_sample_rate;
     int xmin = min({ x0, x1, x2 }) - 1;
     int xmax = max({ x0, x1, x2 }) + 1;
     int ymin = min({ y0, y1, y2 }) - 1;
@@ -153,8 +155,8 @@ namespace CGL {
         int sx = (int)floor(x + 0.5);
         int sy = (int)floor(y + 0.5);
         // check bounds
-        if (sx < 0 || sx >= width * this->sample_rate) continue;
-        if (sy < 0 || sy >= height * this->sample_rate) continue;
+        if (sx < 0 || sx >= width * sqrt_sample_rate) continue;
+        if (sy < 0 || sy >= height * sqrt_sample_rate) continue;
 
         float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
         float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
@@ -164,7 +166,7 @@ namespace CGL {
           float a = (-1 * (x + 0.5 - x1) * (y2 - y1) + (y + 0.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
           float b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
           float r = 1 - a - b;
-          sample_buffer[sy * width * this->sample_rate + sx] = a * c0 + b * c1 + r * c2;
+          sample_buffer[sy * width * sqrt_sample_rate + sx] = a * c0 + b * c1 + r * c2;
         }
       }
     }
@@ -181,7 +183,42 @@ namespace CGL {
     // TODO: Task 5: Fill in the SampleParams struct and pass it to the tex.sample function.
     // TODO: Task 6: Set the correct barycentric differentials in the SampleParams struct.
     // Hint: You can reuse code from rasterize_triangle/rasterize_interpolated_color_triangle
+    int sqrt_sample_rate = sqrt(this->sample_rate);
+    x0 = x0 * sqrt_sample_rate;
+    x1 = x1 * sqrt_sample_rate;
+    x2 = x2 * sqrt_sample_rate;
+    y0 = y0 * sqrt_sample_rate;
+    y1 = y1 * sqrt_sample_rate;
+    y2 = y2 * sqrt_sample_rate;
+    int xmin = min({ x0, x1, x2 }) - 1;
+    int xmax = max({ x0, x1, x2 }) + 1;
+    int ymin = min({ y0, y1, y2 }) - 1;
+    int ymax = max({ y0, y1, y2 }) + 1;
+    for (int y = ymin; y < ymax; y++) {
+      for (int x = xmin; x < xmax; x++) {
+        int sx = (int)floor(x + 0.5);
+        int sy = (int)floor(y + 0.5);
+        // check bounds
+        if (sx < 0 || sx >= width * sqrt_sample_rate) continue;
+        if (sy < 0 || sy >= height * sqrt_sample_rate) continue;
 
+        float l0 = line_equation(x + 0.5, y + 0.5, x0, y0, x1, y1);
+        float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
+        float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
+        if ((l0 >= 0 && l1 >= 0 && l2 >= 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
+          float a = (-1 * (x + 0.5 - x1) * (y2 - y1) + (y + 0.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          float b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          float r = 1 - a - b;
+
+          Vector2D uv((a * u0 + b * u1 + r * u2) / (width * sqrt_sample_rate), (a * v0 + b * v1 + r * v2) / (height * sqrt_sample_rate));
+          SampleParams sp;
+          sp.psm = this->psm;
+          sp.lsm = this->lsm;
+          sp.p_uv = uv;
+          //sample_buffer[sy * width * sqrt_sample_rate + sx] = tex.sample(sp);
+        }
+      }
+    }
 
 
 
@@ -192,8 +229,7 @@ namespace CGL {
 
     this->sample_rate = rate;
 
-
-    this->sample_buffer.resize(width * height * this->sample_rate * this->sample_rate, Color::White);
+    this->sample_buffer.resize(width * height * this->sample_rate, Color::White);
     clear_buffers();
   }
 
@@ -208,7 +244,7 @@ namespace CGL {
     this->rgb_framebuffer_target = rgb_framebuffer;
 
 
-    this->sample_buffer.resize(width * height * this->sample_rate * this->sample_rate, Color::White);
+    this->sample_buffer.resize(width * height * this->sample_rate, Color::White);
     clear_buffers();
   }
 
@@ -239,19 +275,20 @@ namespace CGL {
     }*/
 
     // Task 2
+    int sqrt_sample_rate = sqrt(this->sample_rate);
     for (int x = 0; x < width; ++x) {
       for (int y = 0; y < height; ++y) {
         //Color col = sample_buffer[y * width + x];
         vector<float> c(3, 0.0);
-        if (this->sample_rate == 1) {
+        if (sqrt_sample_rate == 1) {
           c[0] = sample_buffer[y * width + x].r;
           c[1] = sample_buffer[y * width + x].g;
           c[2] = sample_buffer[y * width + x].b;
         }
         else {
-          for (int i = 0; i < this->sample_rate; i++) {
-            for (int j = 0; j < this->sample_rate; j++) {
-              int coord = width * this->sample_rate * (y * this->sample_rate + j) + x * this->sample_rate + i;
+          for (int i = 0; i < sqrt_sample_rate; i++) {
+            for (int j = 0; j < sqrt_sample_rate; j++) {
+              int coord = width * sqrt_sample_rate * (y * sqrt_sample_rate + j) + x * sqrt_sample_rate + i;
               //for (int k = 0; k < 3; ++k) {
               //  (&col.r)[k] += (&sample_buffer[coord].r)[k];
               //}
@@ -262,8 +299,8 @@ namespace CGL {
           }
         }
         for (int k = 0; k < 3; ++k) {
-          //this->rgb_framebuffer_target[3 * (y * width + x) + k] = (&col.r)[k] / this->sample_rate / this->sample_rate * 255 ;
-          this->rgb_framebuffer_target[3 * (y * width + x) + k] = c[k] / this->sample_rate / this->sample_rate * 255;
+          //this->rgb_framebuffer_target[3 * (y * width + x) + k] = (&col.r)[k] / this->sample_rate * 255 ;
+          this->rgb_framebuffer_target[3 * (y * width + x) + k] = c[k] / this->sample_rate * 255;
         }
       }
     }
