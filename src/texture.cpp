@@ -8,7 +8,7 @@ namespace CGL {
 
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
-    Color col(0, 0, 0);
+    Color col(1, 0, 1);
     float level = get_level(sp);
     if (sp.lsm == L_ZERO) {
       if (sp.psm == P_NEAREST) {
@@ -33,31 +33,29 @@ namespace CGL {
         Color floor_c = this->sample_nearest(sp.p_uv, floor_level);
         Color ceil_c = this->sample_nearest(sp.p_uv, ceil_level);
         col = lerp(level - floor_level, ceil_c, floor_c);
+        // col = lerp(level - floor_level, floor_c, ceil_c);
       }
       else if (sp.psm == P_LINEAR) {
         Color floor_c = this->sample_bilinear(sp.p_uv, floor_level);
         Color ceil_c = this->sample_bilinear(sp.p_uv, ceil_level);
         col = lerp(level - floor_level, ceil_c, floor_c);
+        // col = lerp(level - floor_level, floor_c, ceil_c);
       }
     }
-    
     return col;
-
-
-// return magenta for invalid level
-    return Color(1, 0, 1);
   }
 
   float Texture::get_level(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
-    Vector2D duv_dx = sp.p_uv - sp.p_dx_uv;
-    Vector2D duv_dy = sp.p_uv - sp.p_dy_uv;
-    duv_dx.x *= this->width; duv_dx.y *= this->height;
-    duv_dy.x *= this->width; duv_dy.y *= this->height;
-    float D = max(duv_dx.norm(), duv_dy.norm());
-    cout << D << endl;
+    Vector2D duv_dx = sp.p_dx_uv - sp.p_uv;
+    Vector2D duv_dy = sp.p_dy_uv - sp.p_uv;
+    duv_dx.x *= (this->width - 1); duv_dx.y *= (this->height - 1);
+    duv_dy.x *= (this->width - 1); duv_dy.y *= (this->height - 1);
 
-    return max(float(0), min(float(this->mipmap.size() - 1), D));
+    float D = log2(max(duv_dx.norm(), duv_dy.norm()));
+    //cout << D << endl;
+
+    return max(float(0), min(float(this->mipmap.size() - 1), D - 1));
   }
 
   Color MipLevel::get_texel(int tx, int ty) {
@@ -67,10 +65,15 @@ namespace CGL {
   Color Texture::sample_nearest(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
-    int texture_u = round(uv[0] * mip.width);
-    int texture_v = round(uv[1] * mip.height);
+    int texture_u = round(uv[0] * (mip.width - 1));
+    int texture_v = round(uv[1] * (mip.height - 1));
     if ((texture_u < mip.width && texture_u >= 0) && (texture_v < mip.height && texture_v >= 0))
       return mip.get_texel(texture_u, texture_v);
+    else {
+      texture_u = max(0, min((int)mip.width - 1, texture_u));
+      texture_v = max(0, min((int)mip.height - 1, texture_v));
+      return mip.get_texel(texture_u, texture_v);
+    }
     // return magenta for invalid level
     return Color(1, 0, 1);
   }
@@ -78,18 +81,30 @@ namespace CGL {
   Color Texture::sample_bilinear(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
-    float u = uv[0] * mip.width;
-    float v = uv[1] * mip.height;
-    int floor_u = floor(uv[0] * mip.width), floor_v = floor(uv[1] * mip.height);
-    int ceil_u = ceil(uv[0] * mip.width), ceil_v = ceil(uv[1] * mip.height);
-    if (floor_u >= 0 && ceil_u < mip.width && floor_v >= 0 && ceil_v < mip.height) {
-      float s = ceil_u - u, t = ceil_v - v;
-      Color rt = mip.get_texel(floor_u, floor_v);
-      Color lt = mip.get_texel(ceil_u, floor_v);
-      Color rb = mip.get_texel(floor_u, ceil_v);
-      Color lb = mip.get_texel(ceil_u, ceil_v);
-      // return lerp(s, lerp(t, rb, rt), lerp(t, lb, lt));
-      return lerp(t, lerp(s, rb, lb), lerp(s, rt, lt));
+    float u = uv[0] * (mip.width - 1);
+    float v = uv[1] * (mip.height - 1);
+    int floor_u = floor(u), floor_v = floor(v);
+    int ceil_u = ceil(u), ceil_v = ceil(v);
+    float s = u - floor_u, t = v - floor_v;
+    if (floor_u >= 0 && ceil_u < mip.width && floor_v >= 0 && ceil_v < mip.height) { 
+      Color lt = mip.get_texel(floor_u, floor_v);
+      Color rt = mip.get_texel(ceil_u, floor_v);
+      Color lb = mip.get_texel(floor_u, ceil_v);
+      Color rb = mip.get_texel(ceil_u, ceil_v);
+      return lerp(t, lerp(s, lt, rt), lerp(s, lb, rb));
+    }
+    else {
+      floor_u = max(0, min((int)mip.width - 1, floor_u));
+      ceil_u = max(0, min((int)mip.width - 1, ceil_u));
+      floor_v = max(0, min((int)mip.height - 1, floor_v));
+      ceil_v = max(0, min((int)mip.height - 1, ceil_v));
+      s = u - floor_u;
+      t = v - floor_v;
+      Color lt = mip.get_texel(floor_u, floor_v);
+      Color rt = mip.get_texel(ceil_u, floor_v);
+      Color lb = mip.get_texel(floor_u, ceil_v);
+      Color rb = mip.get_texel(ceil_u, ceil_v);
+      return lerp(t, lerp(s, lt, rt), lerp(s, lb, rb));
     }
     // return magenta for invalid level
     return Color(1, 0, 1);

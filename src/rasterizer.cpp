@@ -16,6 +16,7 @@ namespace CGL {
     sample_buffer.resize(width * height * sample_rate, Color::White);
   }
 
+
   // Used by rasterize_point and rasterize_line
   void RasterizerImp::fill_pixel(size_t x, size_t y, Color c) {
     // TODO: Task 2: You might need to this function to fix points and lines (such as the black rectangle border in test4.svg)
@@ -33,6 +34,7 @@ namespace CGL {
     }
   }
 
+
   // Rasterize a point: simple example to help you start familiarizing
   // yourself with the starter code.
   //
@@ -48,6 +50,7 @@ namespace CGL {
     fill_pixel(sx, sy, color);
     return;
   }
+
 
   // Rasterize a line.
   void RasterizerImp::rasterize_line(float x0, float y0,
@@ -72,11 +75,13 @@ namespace CGL {
     }
   }
 
+
   float RasterizerImp::line_equation(float x, float y,
     float x1, float y1,
     float x2, float y2) {
     return -1 * (x - x1) * (y2 - y1) + (y - y1) * (x2 - x1);
   }
+
 
   // Rasterize a triangle.
   void RasterizerImp::rasterize_triangle(float x0, float y0,
@@ -170,8 +175,6 @@ namespace CGL {
         }
       }
     }
-
-
   }
 
 
@@ -206,36 +209,36 @@ namespace CGL {
         float l1 = line_equation(x + 0.5, y + 0.5, x1, y1, x2, y2);
         float l2 = line_equation(x + 0.5, y + 0.5, x2, y2, x0, y0);
         if ((l0 >= 0 && l1 >= 0 && l2 >= 0) || (l0 <= 0 && l1 <= 0 && l2 <= 0)) {
-          float a = (-1 * (x + 0.5 - x1) * (y2 - y1) + (y + 0.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
-          float b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
-          float r = 1 - a - b;
-
-          Vector2D uv((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
           SampleParams sp;
           sp.psm = this->psm;
           sp.lsm = this->lsm;
-          sp.p_uv = uv;
-          // calculate p_dx_uv, p_dy_uv
-          a = (-1 * (x + 1.5 - x1) * (y2 - y1) + (y + 0.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
-          b = (-1 * (x + 1.5 - x2) * (y0 - y2) + (y + 0.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
-          r = 1 - a - b;
-          Vector2D dx_uv((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
-          sp.p_dx_uv = dx_uv;
 
-          a = (-1 * (x + 0.5 - x1) * (y2 - y1) + (y + 1.5 - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
-          b = (-1 * (x + 0.5 - x2) * (y0 - y2) + (y + 1.5 - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          int left = x + 0.5, right = x + 1.5;
+          int top = y + 0.5, bottom = y + 1.5;
+
+          float a = (-1 * (left - x1) * (y2 - y1) + (top - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          float b = (-1 * (left - x2) * (y0 - y2) + (top - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          float r = 1 - a - b;
+          sp.p_uv = Vector2D((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
+
+          // calculate p_dx_uv
+          a = (-1 * (right - x1) * (y2 - y1) + (top - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          b = (-1 * (right - x2) * (y0 - y2) + (top - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
           r = 1 - a - b;
-          Vector2D dy_uv((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
-          sp.p_dy_uv = dy_uv;
+          sp.p_dx_uv = Vector2D((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
+
+          // calculate p_dy_uv
+          a = (-1 * (left - x1) * (y2 - y1) + (bottom - y1) * (x2 - x1)) / (-1 * (x0 - x1) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          b = (-1 * (left - x2) * (y0 - y2) + (bottom - y2) * (x0 - x2)) / (-1 * (x1 - x2) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          r = 1 - a - b;
+          sp.p_dy_uv = Vector2D((a * u0 + b * u1 + r * u2), (a * v0 + b * v1 + r * v2));
 
           sample_buffer[sy * width * sqrt_sample_rate + sx] = tex.sample(sp);
         }
       }
     }
-
-
-
   }
+
 
   void RasterizerImp::set_sample_rate(unsigned int rate) {
     // TODO: Task 2: You may want to update this function for supersampling support
@@ -317,7 +320,6 @@ namespace CGL {
         }
       }
     }
-
   }
 
   Rasterizer::~Rasterizer() { }
