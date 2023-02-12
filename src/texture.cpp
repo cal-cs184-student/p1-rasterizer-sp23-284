@@ -9,6 +9,7 @@ namespace CGL {
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
     Color col(0, 0, 0);
+    float level = get_level(sp);
     if (sp.lsm == L_ZERO) {
       if (sp.psm == P_NEAREST) {
         col = this->sample_nearest(sp.p_uv, 0);
@@ -18,7 +19,26 @@ namespace CGL {
       }
     }
     else if (sp.lsm == L_NEAREST) {
-
+      if (sp.psm == P_NEAREST) {
+        col = this->sample_nearest(sp.p_uv, round(level));
+      }
+      else if (sp.psm == P_LINEAR) {
+        col = this->sample_bilinear(sp.p_uv, round(level));
+      }
+    }
+    else if (sp.lsm == L_LINEAR) {
+      int floor_level = floor(level);
+      int ceil_level = ceil(level);
+      if (sp.psm == P_NEAREST) {
+        Color floor_c = this->sample_nearest(sp.p_uv, floor_level);
+        Color ceil_c = this->sample_nearest(sp.p_uv, ceil_level);
+        col = lerp(level - floor_level, ceil_c, floor_c);
+      }
+      else if (sp.psm == P_LINEAR) {
+        Color floor_c = this->sample_bilinear(sp.p_uv, floor_level);
+        Color ceil_c = this->sample_bilinear(sp.p_uv, ceil_level);
+        col = lerp(level - floor_level, ceil_c, floor_c);
+      }
     }
     
     return col;
@@ -30,10 +50,14 @@ namespace CGL {
 
   float Texture::get_level(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
+    Vector2D duv_dx = sp.p_uv - sp.p_dx_uv;
+    Vector2D duv_dy = sp.p_uv - sp.p_dy_uv;
+    duv_dx.x *= this->width; duv_dx.y *= this->height;
+    duv_dy.x *= this->width; duv_dy.y *= this->height;
+    float D = max(duv_dx.norm(), duv_dy.norm());
+    cout << D << endl;
 
-
-
-    return 0;
+    return max(float(0), min(float(this->mipmap.size() - 1), D));
   }
 
   Color MipLevel::get_texel(int tx, int ty) {
