@@ -47,11 +47,11 @@
             <table style="width=100%">
                 <tr>
                     <td>
-                        <img src="images/01.png" align="middle" width="600px" />
+                        <img src="images/01.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 1. basic/test4.svg</figcaption>
                     </td>
                     <td>
-                        <img src="images/02.png" align="middle" width="600px" />
+                        <img src="images/02.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 2. basic/test6.svg</figcaption>
                     </td>
                 </tr>
@@ -59,7 +59,6 @@
 
             </table>
         </div>
-
 
         <h3 align="middle">Part 2: Antialiasing triangles</h3>
         <p>To implement supersampling, I create a bigger samplebuffer and modified the basic rasterization code to account for different sample sizes. When set_sample_rate or set_framebuffer_target is called, the samplebuffer has to be resized sample_rate times larger to fit in the supersampling size. In the rasterize_triangle function, I multiply all the coordinates with N, making the sample size NxN larger than before, where N is the square root of sample_rate. Then, the rest of the process of rasterizing is the same as task 1.</p>
@@ -71,33 +70,33 @@
             <table style="width=100%">
                 <tr>
                     <td>
-                        <img src="images/03.png" align="middle" width="600px" />
+                        <img src="images/03.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 3. basic/test4.svg, sample rate: 1</figcaption>
                     </td>
                     <td>
-                        <img src="images/06.png" align="middle" width="600px" />
+                        <img src="images/06.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 6. basic/test6.svg, sample rate: 1</</figcaption>
                     </td>
                 </tr>
                 <br />
                 <tr>
                     <td>
-                        <img src="images/04.png" align="middle" width="600px" />
+                        <img src="images/04.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 4. basic/test4.svg, sample rate: 9</</figcaption>
                     </td>
                     <td>
-                        <img src="images/07.png" align="middle" width="600px" />
+                        <img src="images/07.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 7. basic/test6.svg, sample rate: 9</</figcaption>
                     </td>
                 </tr>
                 <br />
                 <tr>
                     <td>
-                        <img src="images/05.png" align="middle" width="600px" />
+                        <img src="images/05.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 5. basic/test4.svg, sample rate: 16</</figcaption>
                     </td>
                     <td>
-                        <img src="images/08.png" align="middle" width="600px" />
+                        <img src="images/08.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 8. basic/test6.svg, sample rate: 16</</figcaption>
                     </td>
                 </tr>
@@ -109,9 +108,9 @@
 
         <h3 align="middle">Part 3: Transforms</h3>
         <p>To apply correct transformations, I write transformation matrixes for each operation. In rotation, the input parameter is degree while in the function we need degree x 2 x pi / 360 to get the correct rotation. The matrixes and the correctly transformed images are shown in Figure 9.</p>
-        
+
         <div align="middle">
-            <img src="images/09.png" align="middle" width="600px" />
+            <img src="images/09.png" align="middle" width="400px" />
             <figcaption align="middle">Fig 9. transforms/robot.svg</figcaption>
         </div>
 
@@ -121,7 +120,7 @@
         <p>The concept of barycentric coordinates is a coordinate system that can interpolate points inside the triangle by calculating the weighting of each triangle's vertices. The interpolated value can be texture coordinates, color, normal, etc.</p>
         <p>The first step of computing the barycentric coordinates are computing “weights”, alpha, beta, and gamma. The equation of computing is listed in Figure 10. It is noteworthy that alpha + beta + gamma = 1. After calculating three weightings, the barycentric coordinates of the pixel inside a triangle can be computed as (x, y) = alpha * A + beta * B + gamma * C. The result of calculating barycentric coordinates and assigning the color based on the coordinates is in Figure 10.</p>
         <div align="middle">
-            <img src="images/10.png" align="middle" width="600px" />
+            <img src="images/10.png" align="middle" width="400px" />
             <figcaption align="middle">Fig 10. transforms/test7.svg</figcaption>
         </div>
 
@@ -134,28 +133,28 @@
             <table style="width=100%">
                 <tr>
                     <td>
-                        <img src="images/11.png" align="middle" width="600px" />
+                        <img src="images/11.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 11. nearest sampling, sample rate: 1</figcaption>
                     </td>
                     <td>
-                        <img src="images/12.png" align="middle" width="600px" />
+                        <img src="images/12.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 12. nearest sampling, sample rate: 16</</figcaption>
                     </td>
                 </tr>
                 <br />
                 <tr>
                     <td>
-                        <img src="images/13.png" align="middle" width="600px" />
+                        <img src="images/13.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 13. bilinear sampling, sample rate: 161</</figcaption>
                     </td>
                     <td>
-                        <img src="images/14.png" align="middle" width="600px" />
+                        <img src="images/14.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 14. bilinear sampling, sample rate: 16</</figcaption>
                     </td>
                 </tr>
             </table>
         </div>
-        
+
         <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
         <p>Though we can get fewer artifacts images by using supersampling, the cost of supersampling is significant. In this section, I implemented mipmaps methods that can produce almost the same result while having little overhead. The concept of mipmaps is sampling texture maps into different levels. Choosing the level of the mipmap whose resolution best approximates the screen sampling rate can reduce the computation overhead and retain enough information.</p>
         <p>To implement mipmaps, I first calculate the correct mipmap level D = log2(L), where L is the max of sqrt((du/dx)^2 + (dv/dx)^2) and sqrt((du/dy)^2 + (dv/dy)^2). This required finding the barycentric coordinates of (x+1, y) and (x, y+1). Then, I can compute the (du/dx, dv/dx) and (du/dy, dv/dy). Next, I multiply these values by the width and height of the texture map respectively. Finally, I can use them to compute the mipmap level D.</p>
@@ -165,22 +164,22 @@
             <table style="width=100%">
                 <tr>
                     <td>
-                        <img src="images/15.png" align="middle" width="600px" />
+                        <img src="images/15.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 15. level zero, nearest sampling</figcaption>
                     </td>
                     <td>
-                        <img src="images/16.png" align="middle" width="600px" />
+                        <img src="images/16.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 16. level zero, bilinear sampling</</figcaption>
                     </td>
                 </tr>
                 <br />
                 <tr>
                     <td>
-                        <img src="images/17.png" align="middle" width="600px" />
+                        <img src="images/17.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 17. level nearest, nearest sampling</</figcaption>
                     </td>
                     <td>
-                        <img src="images/18.png" align="middle" width="600px" />
+                        <img src="images/18.png" align="middle" width="400px" />
                         <figcaption align="middle">Fig 18. level bilinear, bilinear sampling</</figcaption>
                     </td>
                 </tr>
